@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -13,6 +13,7 @@ import { ArrowLeft, Users, FileText, CheckCircle, XCircle } from "lucide-react"
 import { usuarios, materias, secciones, calificaciones, silabos } from "@/lib/datos"
 
 export default function ProfesorPage() {
+  const router = useRouter()
   const [profesorActual] = useState(usuarios.find((u) => u.id === "prof1")!)
   const [notaSeleccionada, setNotaSeleccionada] = useState("")
   const [lapsoSeleccionado, setLapsoSeleccionado] = useState("1")
@@ -44,16 +45,19 @@ export default function ProfesorPage() {
     alert(`Asistencia registrada: ${presente ? "Presente" : "Ausente"}`)
   }
 
+  const cerrarSesion = () => {
+    localStorage.removeItem("usuarioActual")
+    router.push("/login")
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
+            <Button variant="ghost" size="icon" onClick={cerrarSesion} title="Cerrar Sesión">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
             <div>
               <h1 className="text-xl font-semibold text-card-foreground">Portal del Profesor</h1>
               <p className="text-sm text-muted-foreground">{profesorActual.nombre}</p>

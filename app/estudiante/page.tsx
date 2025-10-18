@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -10,6 +10,7 @@ import { ArrowLeft, Download, Calendar, BookOpen, Award } from "lucide-react"
 import { usuarios, materias, secciones, inscripciones, calificaciones, periodos } from "@/lib/datos"
 
 export default function EstudiantePage() {
+  const router = useRouter()
   const [estudianteActual] = useState(usuarios.find((u) => u.id === "est1")!)
 
   // Obtener inscripciones del estudiante
@@ -30,17 +31,20 @@ export default function EstudiantePage() {
     alert("Descargando constancia de estudio...")
   }
 
+  const cerrarSesion = () => {
+    localStorage.removeItem("usuarioActual")
+    router.push("/login")
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-              </Link>
+              <Button variant="ghost" size="icon" onClick={cerrarSesion} title="Cerrar Sesión">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
               <div>
                 <h1 className="text-xl font-semibold text-card-foreground">Portal del Estudiante</h1>
                 <p className="text-sm text-muted-foreground">{estudianteActual.nombre}</p>

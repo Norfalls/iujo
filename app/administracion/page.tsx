@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -12,6 +12,7 @@ import { ArrowLeft, Users, BookOpen, GraduationCap, Calendar, Plus, Pencil, Tras
 import { usuarios, materias, carreras, periodos, secciones } from "@/lib/datos"
 
 export default function AdministracionPage() {
+  const router = useRouter()
   const [adminActual] = useState(usuarios.find((u) => u.id === "admin1")!)
   const [mostrarFormUsuario, setMostrarFormUsuario] = useState(false)
   const [mostrarFormCarrera, setMostrarFormCarrera] = useState(false)
@@ -21,16 +22,19 @@ export default function AdministracionPage() {
   const totalProfesores = usuarios.filter((u) => u.tipo === "profesor").length
   const periodoActivo = periodos.find((p) => p.activo)
 
+  const cerrarSesion = () => {
+    localStorage.removeItem("usuarioActual")
+    router.push("/login")
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
+            <Button variant="ghost" size="icon" onClick={cerrarSesion} title="Cerrar Sesión">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
             <div>
               <h1 className="text-xl font-semibold text-card-foreground">Panel de Administración</h1>
               <p className="text-sm text-muted-foreground">{adminActual.nombre}</p>

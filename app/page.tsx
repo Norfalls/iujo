@@ -1,13 +1,43 @@
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { GraduationCap, Users, Settings } from "lucide-react"
 
 export default function HomePage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    const usuarioGuardado = localStorage.getItem("usuarioActual")
+    if (usuarioGuardado) {
+      const usuario = JSON.parse(usuarioGuardado)
+      switch (usuario.tipo) {
+        case "estudiante":
+          router.push("/estudiante")
+          break
+        case "profesor":
+          router.push("/profesor")
+          break
+        case "administrador":
+          router.push("/administracion")
+          break
+      }
+    }
+  }, [router])
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-6 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-foreground">Sistema de Gestión Académica</h1>
+          <Link
+            href="/login"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            Iniciar Sesión
+          </Link>
         </div>
       </header>
 
@@ -18,7 +48,7 @@ export default function HomePage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <Link href="/estudiante" className="group">
+          <Link href="/login" className="group">
             <Card className="h-full transition-all hover:shadow-lg hover:border-primary">
               <CardHeader className="text-center pb-4">
                 <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -39,7 +69,7 @@ export default function HomePage() {
             </Card>
           </Link>
 
-          <Link href="/profesor" className="group">
+          <Link href="/login" className="group">
             <Card className="h-full transition-all hover:shadow-lg hover:border-primary">
               <CardHeader className="text-center pb-4">
                 <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -58,7 +88,7 @@ export default function HomePage() {
             </Card>
           </Link>
 
-          <Link href="/administracion" className="group">
+          <Link href="/login" className="group">
             <Card className="h-full transition-all hover:shadow-lg hover:border-primary">
               <CardHeader className="text-center pb-4">
                 <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -81,7 +111,7 @@ export default function HomePage() {
 
       <footer className="border-t border-border mt-24">
         <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-          <p>Sistema de Gestión Académica 2025</p>
+          <p>Sistema de Gestión Académica - IUJO © 2025</p>
         </div>
       </footer>
     </div>

@@ -1,3 +1,4 @@
+// Tipos de datos
 export type TipoUsuario = "estudiante" | "profesor" | "administrador"
 
 export interface Usuario {
