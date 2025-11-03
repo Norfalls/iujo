@@ -3,128 +3,9 @@ import { useState } from 'react';
 import { Label } from '@radix-ui/react-label';
 import * as Select from '@radix-ui/react-select';
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
-import classNames from 'classnames'; // Install with: npm install classnames
-
-// Styles (you can put this in a separate CSS file, e.g., StudentForm.module.css or global styles)
-const styles = `
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr) auto; // 4 columns for fields + photo column
-  gap: 16px;
-  align-items: start;
-}
-
-.photo {
-  grid-column: 5;
-  grid-row: 1 / 3; // Span first two rows
-  width: 150px;
-  height: auto;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-.input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.select-trigger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 0 15px;
-  font-size: 13px;
-  line-height: 1;
-  height: 35px;
-  gap: 5px;
-  background-color: white;
-  outline: none;
-}
-
-.select-content {
-  overflow: hidden;
-  background-color: white;
-  border-radius: 6px;
-  box-shadow: 0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2);
-}
-
-.select-viewport {
-  padding: 5px;
-}
-
-.select-item {
-  font-size: 13px;
-  line-height: 1;
-  color: violet;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  height: 25px;
-  padding: 0 35px 0 25px;
-  position: relative;
-  user-select: none;
-}
-
-.select-item[data-disabled] {
-  color: gray;
-  pointer-events: none;
-}
-
-.select-item[data-highlighted] {
-  outline: none;
-  background-color: violet;
-  color: white;
-}
-
-.select-label {
-  padding: 0 25px;
-  font-size: 12px;
-  line-height: 25px;
-  color: gray;
-}
-
-.select-separator {
-  height: 1px;
-  background-color: #ccc;
-  margin: 5px;
-}
-
-.select-item-indicator {
-  position: absolute;
-  left: 0;
-  width: 25px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.select-scroll-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 25px;
-  background-color: white;
-  color: violet;
-  cursor: default;
-}
-
-.button {
-  padding: 8px 16px;
-  background-color: #0070f3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.button:hover {
-  background-color: #0056b3;
-}
-`;
+import classNames from 'classnames';
+import styles from '@/styles/StudentInfo.module.css'
+import { Separator } from '@/components/ui/separator'; // Use the styled wrapper from your UI components (better for consistency with app theme)
 
 // Inject styles (for demo; in real app, use CSS modules or styled-jsx)
 const styleSheet = typeof document !== 'undefined' ? document.createElement('style') : null;
@@ -197,7 +78,7 @@ const StudentForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid-container">
+    <form onSubmit={handleSubmit} className={styles['grid-container']}>
       {/* First row */}
       <div>
         <Label htmlFor="expediente">Expediente</Label>
@@ -206,7 +87,7 @@ const StudentForm: React.FC = () => {
           name="expediente"
           value={formData.expediente}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
         />
       </div>
       <div>
@@ -216,31 +97,31 @@ const StudentForm: React.FC = () => {
           name="cedula"
           value={formData.cedula}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
           required
         />
       </div>
       <div>
         <Label htmlFor="sexo">Sexo</Label>
         <Select.Root value={formData.sexo} onValueChange={handleSelectChange('sexo')}>
-          <Select.Trigger className="select-trigger">
+          <Select.Trigger className={styles['select-trigger']}>
             <Select.Value />
             <Select.Icon>
-              <ChevronDownIcon />
+              <ChevronDownIcon className={styles['select-icon']} />
             </Select.Icon>
           </Select.Trigger>
           <Select.Portal>
-            <Select.Content className="select-content">
-              <Select.ScrollUpButton className="select-scroll-button">
+            <Select.Content className={styles['select-content']}>
+              <Select.ScrollUpButton className={styles['select-scroll-button']}>
                 <ChevronUpIcon />
               </Select.ScrollUpButton>
-              <Select.Viewport className="select-viewport">
+              <Select.Viewport className={styles['select-viewport']}>
                 <SelectItem value="Masculino">Masculino</SelectItem>
                 <SelectItem value="Femenino">Femenino</SelectItem>
                 {/* Add more options as needed */}
               </Select.Viewport>
-              <Select.ScrollDownButton className="select-scroll-button">
-                <ChevronDownIcon />
+              <Select.ScrollDownButton className={styles['select-scroll-button']}>
+                <ChevronDownIcon className={styles['select-icon']} />
               </Select.ScrollDownButton>
             </Select.Content>
           </Select.Portal>
@@ -249,24 +130,24 @@ const StudentForm: React.FC = () => {
       <div>
         <Label htmlFor="edoCivil">Edo. Civil</Label>
         <Select.Root value={formData.edoCivil} onValueChange={handleSelectChange('edoCivil')}>
-          <Select.Trigger className="select-trigger">
+          <Select.Trigger className={styles['select-trigger']}>
             <Select.Value />
             <Select.Icon>
-              <ChevronDownIcon />
+              <ChevronDownIcon className={styles['select-icon']} />
             </Select.Icon>
           </Select.Trigger>
           <Select.Portal>
-            <Select.Content className="select-content">
-              <Select.ScrollUpButton className="select-scroll-button">
+            <Select.Content className={styles['select-content']}>
+              <Select.ScrollUpButton className={styles['select-scroll-button']}>
                 <ChevronUpIcon />
               </Select.ScrollUpButton>
-              <Select.Viewport className="select-viewport">
+              <Select.Viewport className={styles['select-viewport']}>
                 <SelectItem value="Soltero">Soltero</SelectItem>
                 <SelectItem value="Casado">Casado</SelectItem>
                 {/* Add more */}
               </Select.Viewport>
-              <Select.ScrollDownButton className="select-scroll-button">
-                <ChevronDownIcon />
+              <Select.ScrollDownButton className={styles['select-scroll-button']}>
+                <ChevronDownIcon className={styles['select-icon']} />
               </Select.ScrollDownButton>
             </Select.Content>
           </Select.Portal>
@@ -274,7 +155,7 @@ const StudentForm: React.FC = () => {
       </div>
 
       {/* Photo next to first two rows */}
-      <img src={formData.photoUrl} alt="Fotografía" className="photo" />
+      <img src={formData.photoUrl} alt="Fotografía" className={styles['photo']} />
 
       {/* Second row */}
       <div>
@@ -284,7 +165,7 @@ const StudentForm: React.FC = () => {
           name="nombre1"
           value={formData.nombre1}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
           required
         />
       </div>
@@ -295,7 +176,7 @@ const StudentForm: React.FC = () => {
           name="nombre2"
           value={formData.nombre2}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
         />
       </div>
       <div>
@@ -305,7 +186,7 @@ const StudentForm: React.FC = () => {
           name="apellido1"
           value={formData.apellido1}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
           required
         />
       </div>
@@ -316,7 +197,7 @@ const StudentForm: React.FC = () => {
           name="apellido2"
           value={formData.apellido2}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
         />
       </div>
 
@@ -328,24 +209,24 @@ const StudentForm: React.FC = () => {
           name="direccion"
           value={formData.direccion}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
           required
         />
       </div>
 
       {/* More fields - adjust grid as needed */}
-      <div>
+      <div style={{ gridColumn: '1 / 2' }}>
         <Label htmlFor="telefono">Teléfono*</Label>
         <input
           id="telefono"
           name="telefono"
           value={formData.telefono}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
           required
         />
       </div>
-      <div style={{ gridColumn: '2 / 5' }}>
+      <div style={{ gridColumn: '2 / 4' }}>
         <Label htmlFor="email">Email</Label>
         <input
           id="email"
@@ -353,18 +234,18 @@ const StudentForm: React.FC = () => {
           type="email"
           value={formData.email}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
         />
       </div>
 
-      <div>
+      <div style={{ gridColumn: '1 / 3' }}>
         <Label htmlFor="lugarNacimiento">Lugar nacimiento*</Label>
         <input
           id="lugarNacimiento"
           name="lugarNacimiento"
           value={formData.lugarNacimiento}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
           required
         />
       </div>
@@ -376,29 +257,29 @@ const StudentForm: React.FC = () => {
           type="date" // Or text if format specific
           value={formData.fechaNacimiento}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
         />
       </div>
       <div>
         <Label htmlFor="discapacidad">Discapacidad</Label>
         <Select.Root value={formData.discapacidad} onValueChange={handleSelectChange('discapacidad')}>
-          <Select.Trigger className="select-trigger">
+          <Select.Trigger className={styles['select-trigger']}>
             <Select.Value />
             <Select.Icon>
-              <ChevronDownIcon />
+              <ChevronDownIcon className={styles['select-icon']} />
             </Select.Icon>
           </Select.Trigger>
           <Select.Portal>
-            <Select.Content className="select-content">
-              <Select.ScrollUpButton className="select-scroll-button">
+            <Select.Content className={styles['select-content']}>
+              <Select.ScrollUpButton className={styles['select-scroll-button']}>
                 <ChevronUpIcon />
               </Select.ScrollUpButton>
-              <Select.Viewport className="select-viewport">
+              <Select.Viewport className={styles['select-viewport']}>
                 <SelectItem value="Ninguna">Ninguna</SelectItem>
                 {/* Add more options */}
               </Select.Viewport>
-              <Select.ScrollDownButton className="select-scroll-button">
-                <ChevronDownIcon />
+              <Select.ScrollDownButton className={styles['select-scroll-button']}>
+                <ChevronDownIcon className={styles['select-icon']} />
               </Select.ScrollDownButton>
             </Select.Content>
           </Select.Portal>
@@ -407,24 +288,50 @@ const StudentForm: React.FC = () => {
       <div />
 
       <div>
+        <Label htmlFor="etniaIndigena">Pertenece a etnia indígena</Label>
+        <Select.Root value={formData.etniaIndigena} onValueChange={handleSelectChange('etniaIndigena')}>
+          <Select.Trigger className={styles['select-trigger']}>
+            <Select.Value />
+            <Select.Icon>
+              <ChevronDownIcon className={styles['select-icon']} />
+            </Select.Icon>
+          </Select.Trigger>
+          <Select.Portal>
+            <Select.Content className={styles['select-content']}>
+              <Select.ScrollUpButton className={styles['select-scroll-button']}>
+                <ChevronUpIcon />
+              </Select.ScrollUpButton>
+              <Select.Viewport className={styles['select-viewport']}>
+                <SelectItem value="No aplica">No aplica</SelectItem>
+                {/* Add more */}
+              </Select.Viewport>
+              <Select.ScrollDownButton className={styles['select-scroll-button']}>
+                <ChevronDownIcon className={styles['select-icon']} />
+              </Select.ScrollDownButton>
+            </Select.Content>
+          </Select.Portal>
+        </Select.Root>
+      </div>
+
+      <div>
         <Label htmlFor="anoGraduacion">Año graduación*</Label>
         <input
           id="anoGraduacion"
           name="anoGraduacion"
           value={formData.anoGraduacion}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
           required
         />
       </div>
-      <div style={{ gridColumn: '2 / 5' }}>
+      <div style={{ gridColumn: '3 / 5' }}>
         <Label htmlFor="plantelProcedencia">Plantel de procedencia</Label>
         <input
           id="plantelProcedencia"
           name="plantelProcedencia"
           value={formData.plantelProcedencia}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
         />
       </div>
 
@@ -436,6 +343,7 @@ const StudentForm: React.FC = () => {
           type="checkbox"
           checked={formData.estudioFyA}
           onChange={handleChange}
+          className='inline-flex'
         />
       </div>
 
@@ -446,42 +354,19 @@ const StudentForm: React.FC = () => {
           name="codigoRUSNIEU"
           value={formData.codigoRUSNIEU}
           onChange={handleChange}
-          className="input"
+          className={styles['input']}
         />
-      </div>
-      <div>
-        <Label htmlFor="etniaIndigena">Pertenece a etnia indígena</Label>
-        <Select.Root value={formData.etniaIndigena} onValueChange={handleSelectChange('etniaIndigena')}>
-          <Select.Trigger className="select-trigger">
-            <Select.Value />
-            <Select.Icon>
-              <ChevronDownIcon />
-            </Select.Icon>
-          </Select.Trigger>
-          <Select.Portal>
-            <Select.Content className="select-content">
-              <Select.ScrollUpButton className="select-scroll-button">
-                <ChevronUpIcon />
-              </Select.ScrollUpButton>
-              <Select.Viewport className="select-viewport">
-                <SelectItem value="No aplica">No aplica</SelectItem>
-                {/* Add more */}
-              </Select.Viewport>
-              <Select.ScrollDownButton className="select-scroll-button">
-                <ChevronDownIcon />
-              </Select.ScrollDownButton>
-            </Select.Content>
-          </Select.Portal>
-        </Select.Root>
       </div>
       <div />
 
+
       {/* Buttons */}
-      <div style={{ gridColumn: '4 / 6', justifySelf: 'end' }}>
-        <button type="button" className="button" style={{ marginRight: '8px' }}>
+      <Separator style={{ gridColumn: '1 / 6'}} orientation="horizontal"/>
+      <div style={{ gridColumn: '1 / 6', justifySelf: 'end' }}>
+        <button type="button" className={styles['button']} style={{ marginRight: '8px' }}>
           Cambios
         </button>
-        <button type="submit" className="button">
+        <button type="submit" className={styles['button']}>
           Guardar
         </button>
       </div>

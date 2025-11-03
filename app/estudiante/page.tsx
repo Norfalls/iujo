@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Download, Calendar, BookOpen, Award } from "lucide-react"
 import { usuarios, materias, secciones, inscripciones, calificaciones, periodos } from "@/lib/datos"
+import StudentInfo from "@/components/StudentInfo" // Importa tu componente
+import { getUserFromLocalStorage } from "@/lib/auth" // Para protección
 
 export default function EstudiantePage() {
   const router = useRouter()
@@ -82,11 +84,12 @@ export default function EstudiantePage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="horarios" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+        <Tabs defaultValue="horarios" className="space-y-6 gap-2">
+          <TabsList className="grid w-full max-w-md grid-cols-4">
             <TabsTrigger value="horarios">Horarios</TabsTrigger>
             <TabsTrigger value="calificaciones">Calificaciones</TabsTrigger>
             <TabsTrigger value="historial">Historial</TabsTrigger>
+            <TabsTrigger value="perfil">Perfil</TabsTrigger>
           </TabsList>
 
           <TabsContent value="horarios" className="space-y-4">
@@ -189,6 +192,18 @@ export default function EstudiantePage() {
                     <Badge variant="default">Regular</Badge>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="perfil" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Información Personal</CardTitle>
+                <CardDescription>Actualiza tus datos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <StudentInfo /> {/* Aquí renderizas tu componente */}
               </CardContent>
             </Card>
           </TabsContent>

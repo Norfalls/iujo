@@ -13,3 +13,122 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Usuarios {
+  id                Int @id @default(autoincrement())
+  cedula            String? @unique
+  sexo              String
+  edoCivil          String
+  nombre1           String
+  nombre2           String?
+  apellido1         String
+  apellido2         String?
+  lugarNacimiento   String
+  fechaNacimiento   DateTime?  
+  discapacidad      String
+  etniaIndigena     String
+  estado            Boolean @default(false)
+}
+
+model Roles {
+  id                Int @id @default(autoincrement())
+  descripcion       String?
+  estado            Boolean @default(true)
+  
+}
+
+model Contacto {
+  expediente  String?
+  // dato que hay que debatir entre si corresponde a personas o roles(estudiantes, profesores, administradores).
+  direccion   String
+  telefono    String
+  photoUrl    String?  // Opcional para URL de foto
+}
+
+model DatosEstudiantiles {
+  anoGraduacion       String
+  plantelProcedencia  String?   // unidad educativa en que realizo bachillerato
+  estudioFyA          Boolean  @default(false)
+  codigoRUSNIEU       String?
+}
+
+model Professor {
+  id                Int      @id @default(autoincrement())
+  cedula            String   @unique
+  nombre1           String
+  nombre2           String?
+  apellido1         String
+  apellido2         String?
+  email             String?  @unique
+  telefono          String
+  departamento      String
+  fechaContratacion String?  // O DateTime
+  photoUrl          String?  // Opcional
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Modelo para Administrador
+model Administrator {
+  id                Int      @id @default(autoincrement())
+  cedula            String   @unique
+  nombre1           String
+  nombre2           String?
+  apellido1         String
+  apellido2         String?
+  email             String?  @unique
+  telefono          String
+  rol               String   @default("admin")
+  fechaIngreso      String?  // O DateTime
+  photoUrl          String?  // Opcional
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Carrera {
+  id      Int      @id @default(autoincrement())
+  nombre  String
+  codigo  String
+  materias Materia[]
+}
+
+model Materia {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  codigo    String
+  creditos  Int
+  carreraId Int
+  profesorId Int
+  secciones Seccion[]
+  carrera   Carrera  @relation(fields: [carreraId], references: [id])
+  profesor  User     @relation(fields: [profesorId], references: [id], onDelete: SetNull)
+}
+
+model Seccion {
+  id            Int          @id @default(autoincrement())
+  materiaId     Int
+  codigo        String
+  horario       String
+  cupoMaximo    Int
+  inscripciones Inscripcion[]
+  materia       Materia      @relation(fields: [materiaId], references: [id])
+}
+
+model Inscripcion {
+  id          Int      @id @default(autoincrement())
+  estudianteId Int
+  seccionId   Int
+  periodoId   Int
+  estudiante  User     @relation(fields: [estudianteId], references: [id])
+  seccion     Seccion  @relation(fields: [seccionId], references: [id])
+  periodo     Periodo  @relation(fields: [periodoId], references: [id])
+}
+
+model Periodo {
+  id          Int          @id @default(autoincrement())
+  nombre      String
+  fechaInicio String
+  fechaFin    String
+  activo      Boolean
+  inscripciones Inscripcion[]
+}
