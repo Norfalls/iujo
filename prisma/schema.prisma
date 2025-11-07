@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
@@ -14,77 +11,88 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Usuarios {
-  id                Int @id @default(autoincrement())
-  cedula            String? @unique
-  sexo              String
-  edoCivil          String
-  nombre1           String
-  nombre2           String?
-  apellido1         String
-  apellido2         String?
-  lugarNacimiento   String
-  fechaNacimiento   DateTime?  
-  discapacidad      String
-  etniaIndigena     String
-  estado            Boolean @default(false)
-}
-
+// Tabla Roles (fundamental para RBAC simple)
 model Roles {
-  id                Int @id @default(autoincrement())
-  descripcion       String?
-  estado            Boolean @default(true)
-  
+  id          Int      @id @default(autoincrement())
+  descripcion String?
+  permisos    String[] // e.g., ["read:users", "write:materias"]
+  estado      Boolean  @default(true)
+  users       User[]
 }
 
-model Contacto {
-  expediente  String?
-  // dato que hay que debatir entre si corresponde a personas o roles(estudiantes, profesores, administradores).
-  direccion   String
-  telefono    String
-  photoUrl    String?  // Opcional para URL de foto
-}
-
-model DatosEstudiantiles {
-  anoGraduacion       String
-  plantelProcedencia  String?   // unidad educativa en que realizo bachillerato
-  estudioFyA          Boolean  @default(false)
-  codigoRUSNIEU       String?
-}
-
-model Professor {
+// Tabla Unificada de Usuarios
+model User {
   id                Int      @id @default(autoincrement())
   cedula            String   @unique
+  sexo              String?
+  edoCivil          String?
   nombre1           String
   nombre2           String?
   apellido1         String
   apellido2         String?
+  lugarNacimiento   String?
+  fechaNacimiento   DateTime?
+  discapacidad      String?
+  etniaIndigena     String?
   email             String?  @unique
-  telefono          String
-  departamento      String
-  fechaContratacion String?  // O DateTime
+  telefono         String?
   photoUrl          String?  // Opcional
+  roleId            Int
+  estado            Boolean  @default(true)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  // Relaciones
+  role              Roles    @relation(fields: [roleId], references: [id])
+  studentProfile    StudentProfile?
+  professorProfile  ProfessorProfile?
+  adminProfile      AdminProfile?
+  inscripciones     Inscripcion[]
+  materias          Materia[]  // Para profesores
+  asistencias       Asistencia[]
+  calificaciones    Calificacion[]
+  silabos           Silabo[]
 }
 
-// Modelo para Administrador
-model Administrator {
-  id                Int      @id @default(autoincrement())
-  cedula            String   @unique
-  nombre1           String
-  nombre2           String?
-  apellido1         String
-  apellido2         String?
-  email             String?  @unique
-  telefono          String
+// Perfiles Específicos (para datos únicos, reduciendo clutter en User)
+model StudentProfile {
+  userId            Int      @id @unique
+  anoGraduacion     String?
+  plantelProcedencia String?
+  estudioFyA        Boolean  @default(false)
+  codigoRUSNIEU     String?
+
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model ProfessorProfile {
+  userId            Int      @id @unique
+  departamento      String?
+  fechaContratacion DateTime?
+
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model AdminProfile {
+  userId            Int      @id @unique
   rol               String   @default("admin")
-  fechaIngreso      String?  // O DateTime
-  photoUrl          String?  // Opcional
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  fechaIngreso      DateTime?
+
+  user              User     @relation(fields: [userId], references: [id])
 }
 
+// Contacto (asociado a User)
+model Contacto {
+  userId      Int      @id @unique
+  expediente  String?
+  direccion   String?
+  telefono   String?  // Redundante si en User, pero opcional
+  photoUrl    String?  // Opcional
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+// Carrera y Materia (mantenidas, con mejoras)
 model Carrera {
   id      Int      @id @default(autoincrement())
   nombre  String
@@ -93,17 +101,32 @@ model Carrera {
 }
 
 model Materia {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  codigo    String
-  creditos  Int
-  carreraId Int
-  profesorId Int
-  secciones Seccion[]
-  carrera   Carrera  @relation(fields: [carreraId], references: [id])
-  profesor  User     @relation(fields: [profesorId], references: [id], onDelete: SetNull)
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  codigo      String
+  creditos    Int
+  carreraId   Int
+  profesorId  Int?     // Opcional
+  secciones   Seccion[]
+  silabos     Silabo[]
+  calificaciones Calificacion[]
+  prerrequisitos Prerrequisito[] @relation("MateriaPrerrequisitos")
+  requiredFor Prerrequisito[] @relation("PrerrequisitoMaterias")
+
+  carrera     Carrera  @relation(fields: [carreraId], references: [id])
+  profesor    User?    @relation(fields: [profesorId], references: [id])
 }
 
+model Prerrequisito {
+  id                Int @id @default(autoincrement())
+  materiaId         Int // Materia que requiere este prerrequisito
+  prerrequisitoId   Int // Materia prerrequisita
+
+  materia           Materia @relation("MateriaPrerrequisitos", fields: [materiaId], references: [id])
+  prerrequisito     Materia @relation("PrerrequisitoMaterias", fields: [prerrequisitoId], references: [id])
+}
+
+// Seccion e Inscripcion
 model Seccion {
   id            Int          @id @default(autoincrement())
   materiaId     Int
@@ -111,24 +134,93 @@ model Seccion {
   horario       String
   cupoMaximo    Int
   inscripciones Inscripcion[]
+  asistencias   Asistencia[]
+  eventos       Evento[]
+
   materia       Materia      @relation(fields: [materiaId], references: [id])
 }
 
 model Inscripcion {
-  id          Int      @id @default(autoincrement())
-  estudianteId Int
-  seccionId   Int
-  periodoId   Int
-  estudiante  User     @relation(fields: [estudianteId], references: [id])
-  seccion     Seccion  @relation(fields: [seccionId], references: [id])
-  periodo     Periodo  @relation(fields: [periodoId], references: [id])
+  id            Int      @id @default(autoincrement())
+  estudianteId  Int
+  seccionId     Int
+  periodoId     Int
+  pago          PagoMatricula?
+
+  estudiante    User     @relation(fields: [estudianteId], references: [id])
+  seccion       Seccion  @relation(fields: [seccionId], references: [id])
+  periodo       Periodo  @relation(fields: [periodoId], references: [id])
 }
 
+model PagoMatricula {
+  id              Int      @id @default(autoincrement())
+  inscripcionId   Int      @unique
+  montoTotal      Float
+  montoPagado     Float    @default(0)
+  fechaPago       DateTime?
+  estado          String   @default("pendiente") // pendiente, aprobado, rechazado
+
+  inscripcion     Inscripcion @relation(fields: [inscripcionId], references: [id])
+}
+
+// Periodo
 model Periodo {
-  id          Int          @id @default(autoincrement())
-  nombre      String
-  fechaInicio String
-  fechaFin    String
-  activo      Boolean
+  id            Int          @id @default(autoincrement())
+  nombre        String
+  fechaInicio   DateTime
+  fechaFin      DateTime
+  activo        Boolean
   inscripciones Inscripcion[]
+  eventos       Evento[]
+  calificaciones Calificacion[]
+}
+
+// Actividades Académicas
+model Evento {
+  id            Int      @id @default(autoincrement())
+  nombre        String
+  descripcion   String
+  tipo          String   // examen, taller, etc.
+  fechaInicio   DateTime
+  fechaFin      DateTime
+  seccionId     Int?
+  periodoId     Int
+
+  seccion       Seccion? @relation(fields: [seccionId], references: [id])
+  periodo       Periodo  @relation(fields: [periodoId], references: [id])
+}
+
+model Asistencia {
+  id            Int      @id @default(autoincrement())
+  userId        Int      // Estudiante
+  seccionId     Int
+  fecha         DateTime
+  presente      Boolean  @default(false)
+
+  user          User     @relation(fields: [userId], references: [id])
+  seccion       Seccion  @relation(fields: [seccionId], references: [id])
+}
+
+model Calificacion {
+  id            Int      @id @default(autoincrement())
+  userId        Int      // Estudiante
+  materiaId     Int
+  lapso         Int
+  nota          Int
+  periodoId     Int
+
+  user          User     @relation(fields: [userId], references: [id])
+  materia       Materia  @relation(fields: [materiaId], references: [id])
+  periodo       Periodo  @relation(fields: [periodoId], references: [id])
+}
+
+model Silabo {
+  id            Int      @id @default(autoincrement())
+  materiaId     Int
+  profesorId    Int
+  contenido     String
+  objetivos     String[]
+
+  materia       Materia  @relation(fields: [materiaId], references: [id])
+  profesor      User     @relation(fields: [profesorId], references: [id])
 }

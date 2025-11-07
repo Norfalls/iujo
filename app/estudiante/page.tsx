@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Download, Calendar, BookOpen, Award } from "lucide-react"
 import { usuarios, materias, secciones, inscripciones, calificaciones, periodos } from "@/lib/datos"
 import StudentInfo from "@/components/StudentInfo" // Importa tu componente
+import CarreraInfoCard from "@/components/CarreraInfoCard"
 import { getUserFromLocalStorage } from "@/lib/auth" // Para protección
 
 export default function EstudiantePage() {
@@ -52,6 +53,15 @@ export default function EstudiantePage() {
                 <p className="text-sm text-muted-foreground">{estudianteActual.nombre}</p>
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-muted-foreground hover:text-foreground"
+              onClick={() => router.push("/calendario")}
+            >
+              <Calendar className="w-4 h-4" />
+              Calendario
+            </Button>
             <Button onClick={descargarConstancia} className="gap-2">
               <Download className="w-4 h-4" />
               Descargar Constancia
@@ -85,11 +95,12 @@ export default function EstudiantePage() {
         </div>
 
         <Tabs defaultValue="horarios" className="space-y-6 gap-2">
-          <TabsList className="grid w-full max-w-md grid-cols-4">
+          <TabsList className="grid w-full max-w-md grid-cols-5">
             <TabsTrigger value="horarios">Horarios</TabsTrigger>
             <TabsTrigger value="calificaciones">Calificaciones</TabsTrigger>
             <TabsTrigger value="historial">Historial</TabsTrigger>
             <TabsTrigger value="perfil">Perfil</TabsTrigger>
+            <TabsTrigger value="carrera">Carrera</TabsTrigger>
           </TabsList>
 
           <TabsContent value="horarios" className="space-y-4">
@@ -206,6 +217,24 @@ export default function EstudiantePage() {
                 <StudentInfo /> {/* Aquí renderizas tu componente */}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="carrera" className="space-y-4">
+            <CarreraInfoCard 
+              estudiante={{
+                carrera: "Informática",
+                horario: "Vespertino",
+                creditosInscritos: 119,
+                creditosAprobados: 102,
+                indiceAcademico: 13.463,
+                indiceEficiencia: 0.857,
+                servicioComunitario: {
+                  porcentaje: 83.61,
+                  iniciado: "22-04-2024",
+                  culminado: false
+                }
+              }} 
+            />
           </TabsContent>
         </Tabs>
       </main>
