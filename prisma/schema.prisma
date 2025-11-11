@@ -3,7 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../lib/generated/prisma"
 }
 
 datasource db {
@@ -15,120 +14,130 @@ datasource db {
 model Roles {
   id          Int      @id @default(autoincrement())
   descripcion String?
-  permisos    String[] // e.g., ["read:users", "write:materias"]
+  permisos    String[]
+  // e.g., ["read:users", "write:materias"]
   estado      Boolean  @default(true)
   users       User[]
 }
 
 // Tabla Unificada de Usuarios
 model User {
-  id                Int      @id @default(autoincrement())
-  cedula            String   @unique
-  sexo              String?
-  edoCivil          String?
-  nombre1           String
-  nombre2           String?
-  apellido1         String
-  apellido2         String?
-  lugarNacimiento   String?
-  fechaNacimiento   DateTime?
-  discapacidad      String?
-  etniaIndigena     String?
-  email             String?  @unique
-  telefono         String?
-  photoUrl          String?  // Opcional
-  roleId            Int
-  estado            Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id              Int       @id @default(autoincrement())
+  cedula          String    @unique
+  sexo            String?
+  edoCivil        String?
+  nombre1         String
+  nombre2         String?
+  apellido1       String
+  apellido2       String?
+  lugarNacimiento String?
+  fechaNacimiento DateTime?
+  discapacidad    String?
+  etniaIndigena   String?
+  email           String?   @unique
+  passwordHash    String?
+  telefono        String?
+  photoUrl        String?
+  // Opcional
+  roleId          Int       @default(4) // ← Pendiente|Solicitante por defecto
+  // false = pendiente
+  estado          Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   // Relaciones
-  role              Roles    @relation(fields: [roleId], references: [id])
-  studentProfile    StudentProfile?
-  professorProfile  ProfessorProfile?
-  adminProfile      AdminProfile?
-  inscripciones     Inscripcion[]
-  materias          Materia[]  // Para profesores
-  asistencias       Asistencia[]
-  calificaciones    Calificacion[]
-  silabos           Silabo[]
+  role             Roles             @relation(fields: [roleId], references: [id])
+  studentProfile   StudentProfile?
+  professorProfile ProfessorProfile?
+  adminProfile     AdminProfile?
+  inscripciones    Inscripcion[]
+  materias         Materia[]
+  // Para profesores
+  asistencias      Asistencia[]
+  calificaciones   Calificacion[]
+  silabos          Silabo[]
+  contacto         Contacto?
 }
 
 // Perfiles Específicos (para datos únicos, reduciendo clutter en User)
 model StudentProfile {
-  userId            Int      @id @unique
-  anoGraduacion     String?
+  userId             Int     @id @unique
+  anoGraduacion      String?
   plantelProcedencia String?
-  estudioFyA        Boolean  @default(false)
-  codigoRUSNIEU     String?
+  estudioFyA         Boolean @default(false)
+  codigoRUSNIEU      String?
 
-  user              User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model ProfessorProfile {
-  userId            Int      @id @unique
+  userId            Int       @id @unique
   departamento      String?
   fechaContratacion DateTime?
 
-  user              User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model AdminProfile {
-  userId            Int      @id @unique
-  rol               String   @default("admin")
-  fechaIngreso      DateTime?
+  userId       Int       @id @unique
+  rol          String    @default("admin")
+  fechaIngreso DateTime?
 
-  user              User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 // Contacto (asociado a User)
 model Contacto {
-  userId      Int      @id @unique
-  expediente  String?
-  direccion   String?
-  telefono   String?  // Redundante si en User, pero opcional
-  photoUrl    String?  // Opcional
+  userId     Int     @id @unique
+  expediente String?
+  direccion  String?
+  telefono   String?
+  // Redundante si en User, pero opcional
+  photoUrl   String?
 
-  user        User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 // Carrera y Materia (mantenidas, con mejoras)
 model Carrera {
-  id      Int      @id @default(autoincrement())
-  nombre  String
-  codigo  String
+  id       Int       @id @default(autoincrement())
+  nombre   String
+  codigo   String
   materias Materia[]
 }
 
 model Materia {
-  id          Int      @id @default(autoincrement())
-  nombre      String
-  codigo      String
-  creditos    Int
-  carreraId   Int
-  profesorId  Int?     // Opcional
-  secciones   Seccion[]
-  silabos     Silabo[]
+  id             Int             @id @default(autoincrement())
+  nombre         String
+  codigo         String
+  creditos       Int
+  carreraId      Int
+  profesorId     Int?
+  // Opcional
+  secciones      Seccion[]
+  silabos        Silabo[]
   calificaciones Calificacion[]
   prerrequisitos Prerrequisito[] @relation("MateriaPrerrequisitos")
-  requiredFor Prerrequisito[] @relation("PrerrequisitoMaterias")
+  requiredFor    Prerrequisito[] @relation("PrerrequisitoMaterias")
 
-  carrera     Carrera  @relation(fields: [carreraId], references: [id])
-  profesor    User?    @relation(fields: [profesorId], references: [id])
+  carrera  Carrera @relation(fields: [carreraId], references: [id])
+  profesor User?   @relation(fields: [profesorId], references: [id])
 }
 
 model Prerrequisito {
-  id                Int @id @default(autoincrement())
-  materiaId         Int // Materia que requiere este prerrequisito
-  prerrequisitoId   Int // Materia prerrequisita
+  id              Int @id @default(autoincrement())
+  // Materia que requiere este prerrequisito
+  materiaId       Int
+  // Materia prerrequisita
+  prerrequisitoId Int
 
-  materia           Materia @relation("MateriaPrerrequisitos", fields: [materiaId], references: [id])
-  prerrequisito     Materia @relation("PrerrequisitoMaterias", fields: [prerrequisitoId], references: [id])
+  materia       Materia @relation("MateriaPrerrequisitos", fields: [materiaId], references: [id])
+  prerrequisito Materia @relation("PrerrequisitoMaterias", fields: [prerrequisitoId], references: [id])
 }
 
 // Seccion e Inscripcion
 model Seccion {
-  id            Int          @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   materiaId     Int
   codigo        String
   horario       String
@@ -137,90 +146,93 @@ model Seccion {
   asistencias   Asistencia[]
   eventos       Evento[]
 
-  materia       Materia      @relation(fields: [materiaId], references: [id])
+  materia Materia @relation(fields: [materiaId], references: [id])
 }
 
 model Inscripcion {
-  id            Int      @id @default(autoincrement())
-  estudianteId  Int
-  seccionId     Int
-  periodoId     Int
-  pago          PagoMatricula?
+  id           Int            @id @default(autoincrement())
+  estudianteId Int
+  seccionId    Int
+  periodoId    Int
+  pago         PagoMatricula?
 
-  estudiante    User     @relation(fields: [estudianteId], references: [id])
-  seccion       Seccion  @relation(fields: [seccionId], references: [id])
-  periodo       Periodo  @relation(fields: [periodoId], references: [id])
+  estudiante User    @relation(fields: [estudianteId], references: [id])
+  seccion    Seccion @relation(fields: [seccionId], references: [id])
+  periodo    Periodo @relation(fields: [periodoId], references: [id])
 }
 
 model PagoMatricula {
-  id              Int      @id @default(autoincrement())
-  inscripcionId   Int      @unique
-  montoTotal      Float
-  montoPagado     Float    @default(0)
-  fechaPago       DateTime?
-  estado          String   @default("pendiente") // pendiente, aprobado, rechazado
+  id            Int       @id @default(autoincrement())
+  inscripcionId Int       @unique
+  montoTotal    Float
+  montoPagado   Float     @default(0)
+  fechaPago     DateTime?
+  estado        String    @default("pendiente") // pendiente, aprobado, rechazado
 
-  inscripcion     Inscripcion @relation(fields: [inscripcionId], references: [id])
+  inscripcion Inscripcion @relation(fields: [inscripcionId], references: [id])
 }
 
 // Periodo
 model Periodo {
-  id            Int          @id @default(autoincrement())
-  nombre        String
-  fechaInicio   DateTime
-  fechaFin      DateTime
-  activo        Boolean
-  inscripciones Inscripcion[]
-  eventos       Evento[]
+  id             Int            @id @default(autoincrement())
+  nombre         String
+  fechaInicio    DateTime
+  fechaFin       DateTime
+  activo         Boolean
+  inscripciones  Inscripcion[]
+  eventos        Evento[]
   calificaciones Calificacion[]
 }
 
 // Actividades Académicas
 model Evento {
-  id            Int      @id @default(autoincrement())
-  nombre        String
-  descripcion   String
-  tipo          String   // examen, taller, etc.
-  fechaInicio   DateTime
-  fechaFin      DateTime
-  seccionId     Int?
-  periodoId     Int
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  // examen, taller, etc.
+  tipo        String
+  fechaInicio DateTime
+  fechaFin    DateTime
+  seccionId   Int?
+  periodoId   Int
 
-  seccion       Seccion? @relation(fields: [seccionId], references: [id])
-  periodo       Periodo  @relation(fields: [periodoId], references: [id])
+  seccion Seccion? @relation(fields: [seccionId], references: [id])
+  periodo Periodo  @relation(fields: [periodoId], references: [id])
 }
 
 model Asistencia {
-  id            Int      @id @default(autoincrement())
-  userId        Int      // Estudiante
-  seccionId     Int
-  fecha         DateTime
-  presente      Boolean  @default(false)
+  id        Int      @id @default(autoincrement())
+  // Estudiante
+  userId    Int
+  seccionId Int
+  fecha     DateTime
+  presente  Boolean  @default(false)
 
-  user          User     @relation(fields: [userId], references: [id])
-  seccion       Seccion  @relation(fields: [seccionId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  seccion Seccion @relation(fields: [seccionId], references: [id])
 }
 
 model Calificacion {
-  id            Int      @id @default(autoincrement())
-  userId        Int      // Estudiante
-  materiaId     Int
-  lapso         Int
-  nota          Int
-  periodoId     Int
+  id        Int @id @default(autoincrement())
+  // Estudiante
+  userId    Int
+  materiaId Int
+  lapso     Int
+  nota      Int
+  periodoId Int
 
-  user          User     @relation(fields: [userId], references: [id])
-  materia       Materia  @relation(fields: [materiaId], references: [id])
-  periodo       Periodo  @relation(fields: [periodoId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  materia Materia @relation(fields: [materiaId], references: [id])
+  periodo Periodo @relation(fields: [periodoId], references: [id])
 }
 
 model Silabo {
-  id            Int      @id @default(autoincrement())
-  materiaId     Int
-  profesorId    Int
-  contenido     String
-  objetivos     String[]
+  id         Int      @id @default(autoincrement())
+  materiaId  Int
+  profesorId Int
+  contenido  String
+  objetivos  String[]
 
-  materia       Materia  @relation(fields: [materiaId], references: [id])
-  profesor      User     @relation(fields: [profesorId], references: [id])
+  materia  Materia @relation(fields: [materiaId], references: [id])
+  profesor User    @relation(fields: [profesorId], references: [id])
 }
